@@ -51,13 +51,14 @@ class Data {
 }
 
 class MyGroupSource extends DataGridSource {
-
   final List<Group> groups;
   List<Data> _data = [];
 
   MyGroupSource(this.groups) {
-    _data = [for (var i =0; i < 30; i++)
-      Data(faker.randomGenerator.element(groups), "Data $i"),];
+    _data = [
+      for (var i = 0; i < 30; i++)
+        Data(faker.randomGenerator.element(groups), "Data $i"),
+    ];
   }
 
   @override
@@ -73,23 +74,22 @@ class MyGroupSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    return  DataGridRowAdapter(
+    return DataGridRowAdapter(
         cells: row.getCells().map((dataCell) {
-          if (dataCell.value is Group) {
-            return Container(color: Colors.orange[600], child: Text((dataCell.value as Group).name));
-          }
-          return Container(
-            alignment: Alignment.center,
-            child: Text(dataCell.value.toString()),
-          );
-        }).toList());
+      if (dataCell.value is Group) {
+        return Container(
+            color: Colors.orange[600],
+            child: Text((dataCell.value as Group).name));
+      }
+      return Container(
+        alignment: Alignment.center,
+        child: Text(dataCell.value.toString()),
+      );
+    }).toList());
   }
-
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
-
   final MyGroupSource _source = MyGroupSource([
     Group(1, "group 1"),
     Group(2, "group 2"),
@@ -98,32 +98,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         actions: [
-          DropdownMenu(
-            dropdownMenuEntries: _source.groups.map((g) => DropdownMenuEntry(value: g, label: g.name)).toList(),
-            onSelected: (selected) {
+          DropdownMenu<Group>(
+            dropdownMenuEntries: _source.groups
+                .map((g) => DropdownMenuEntry<Group>(value: g, label: g.name))
+                .toList(),
+            onSelected: (Group? selected) {
               _source.clearFilters(columnName: "group");
               if (selected != null) {
                 _source.addFilter(
                     "group",
-                    FilterCondition(type: FilterType.equals, value: selected, filterBehavior: FilterBehavior.strongDataType, filterOperator: FilterOperator.or,)
-                );
+                    FilterCondition(
+                      type: FilterType.equals,
+                      value: selected,
+                      filterBehavior: FilterBehavior.strongDataType,
+                      filterOperator: FilterOperator.and,
+                    ));
               }
             },
           )
         ],
       ),
-      body: SfDataGrid(source: _source, columns: [
-        GridColumn(columnName: "group", label: const Text("Group")),
-        GridColumn(columnName: "other", label: const Text("Other")),
-      ],
-
-      ),// This trailing comma makes auto-formatting nicer for build methods.
+      body: SfDataGrid(
+        source: _source,
+        columns: [
+          GridColumn(columnName: "group", label: const Text("Group")),
+          GridColumn(columnName: "other", label: const Text("Other")),
+        ],
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
